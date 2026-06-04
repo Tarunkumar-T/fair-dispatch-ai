@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Customer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>Customer – Delivery Details</header>
+
+<main class="page">
+  <div class="page-title">Describe your building and parcel</div>
+  <div class="page-subtitle">
+    These details help the system estimate the real-world difficulty of your delivery and assign fair workload points to drivers using the trained ML model.
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h3>Delivery difficulty inputs</h3>
+      <small>Form aligned with the XGBoost difficulty model features (distance, weight, stairs, building type, elevator, parking, traffic).</small>
+
+      <form id="customerForm">
+        <label>Distance from hub (km)</label>
+        <input type="number" id="distance" min="0" step="0.1" required>
+
+        <label>Total package weight (kg)</label>
+        <input type="number" id="weight" min="1" required>
+
+        <label>Estimated stairs to climb (total steps)</label>
+        <input type="number" id="stairs" min="0" required>
+
+        <label>Building type</label>
+        <select id="buildingType">
+          <option value="apartment">Apartment</option>
+          <option value="commercial">Commercial</option>
+          <option value="house">House</option>
+        </select>
+
+        <label>Elevator state</label>
+        <select id="elevator">
+          <option value="yes">Available</option>
+          <option value="broken">Broken</option>
+          <option value="no">No elevator</option>
+        </select>
+
+        <label>Parking</label>
+        <select id="parking">
+          <option value="dedicated">Dedicated bay / building parking</option>
+          <option value="street">Street parking nearby</option>
+          <option value="none">No official parking</option>
+          <option value="difficult">Very difficult parking</option>
+        </select>
+
+        <label>Traffic at planned delivery time</label>
+        <select id="traffic">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <button type="submit">Estimate AI Difficulty Points</button>
+        <p class="muted">In the real system this input would be enriched with live Google Maps traffic and scored by the trained XGBoost model on the backend.</p>
+      </form>
+    </div>
+
+    <div class="card" id="resultBox">
+      <h3>Difficulty score explanation</h3>
+      <small>Shows the base workload points and how the ML model (conceptually) weights each factor.</small>
+      <p id="resultText">No data yet</p>
+    </div>
+  </div>
+</main>
+
+<script src="js/customer.js"></script>
+</body>
+</html>

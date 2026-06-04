@@ -1,0 +1,65 @@
+{
+    "model_type": "XGBoost Regressor",
+    "model_version": "1.0",
+    "training_date": "2026-02-04 09:50:29",
+    "training_samples": 4000,
+    "test_samples": 1000,
+    "feature_columns": [
+        "distance_km",
+        "package_weight_kg",
+        "stairs_count",
+        "time_of_day",
+        "building_apartment",
+        "building_commercial",
+        "building_house",
+        "elevator_encoded",
+        "parking_encoded",
+        "traffic_encoded"
+    ],
+    "performance_metrics": {
+        "train_rmse": 2.8944304118829183,
+        "train_mae": 2.2485998428726197,
+        "train_r2": 0.9797267547485746,
+        "test_rmse": 5.2330721566259895,
+        "test_mae": 4.139670826721191,
+        "test_r2": 0.9329645795758472,
+        "test_mape": 8.469509622422166
+    },
+    "hyperparameters": {
+        "n_estimators": 200,
+        "max_depth": 6,
+        "learning_rate": 0.1,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8
+    },
+    "feature_importance": {
+        "stairs_count": 0.3113839030265808,
+        "building_house": 0.17776137590408325,
+        "traffic_encoded": 0.1729820817708969,
+        "elevator_encoded": 0.143516406416893,
+        "parking_encoded": 0.0950983315706253,
+        "package_weight_kg": 0.03356047719717026,
+        "building_commercial": 0.022318053990602493,
+        "distance_km": 0.020071739330887794,
+        "building_apartment": 0.01872869022190571,
+        "time_of_day": 0.004578863736242056
+    },
+    "encoding_mappings": {
+        "elevator": {
+            "yes": 2,
+            "broken": 1,
+            "no": 0
+        },
+        "parking": {
+            "dedicated": 3,
+            "street": 2,
+            "none": 1,
+            "difficult": 0
+        },
+        "traffic": {
+            "low": 1,
+            "medium": 2,
+            "high": 3
+        }
+    }
+}

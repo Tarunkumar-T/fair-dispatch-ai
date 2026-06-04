@@ -1,0 +1,29 @@
+{
+    "model_type": "Facebook Prophet",
+    "model_version": "1.0",
+    "training_date": "2026-02-04 09:52:27",
+    "training_samples": 3456,
+    "test_samples": 865,
+    "performance_metrics": {
+        "test_mae": 0.34504776519171776,
+        "test_rmse": 0.450244050404717,
+        "test_mape": 32.81120580751817,
+        "within_10pct": 23.468208092485547,
+        "within_20pct": 42.77456647398844
+    },
+    "model_parameters": {
+        "yearly_seasonality": false,
+        "weekly_seasonality": true,
+        "daily_seasonality": true,
+        "seasonality_mode": "multiplicative",
+        "interval_width": 0.95
+    },
+    "prediction_range": "24 hours ahead",
+    "data_period": "6 months",
+    "features": [
+        "datetime",
+        "hour_of_day",
+        "day_of_week",
+        "weekend_indicator"
+    ]
+}

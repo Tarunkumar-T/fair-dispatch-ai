@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fair Dispatch System - AI-Powered Route Allocation</title>
+   
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+   
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+   
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+   
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+   
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+       
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+       
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Truck, Package, MapPin, Clock, TrendingUp, CheckCircle, AlertCircle, Calendar, User, Settings, BarChart3, Star, Navigation, Phone, Building2, Stairs, Car, Shield, Weight, Activity, MessageSquare } = lucide;
+        
+        // Google Maps API Key
+        const MAP_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjIyOTk0MDMxODhmZjQyZTFhM2NjZWY0MTA4YTA0NzJmIiwiaCI6Im11cm11cjY0In0=";
+
+        // Icon Component Wrapper
+        const Icon = ({ icon: IconComponent, ...props }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+           
+            return <i data-lucide={IconComponent} {...props}></i>;
+        };
+
+        // Main App Component
+        function FairDispatchSystem() {
+            const [currentView, setCurrentView] = useState('login');
+            const [userType, setUserType] = useState(null);
+            const [userData, setUserData] = useState(null);
+
+            const handleLogin = (type, data) => {
+                setUserType(type);
+                setUserData(data);
+                setCurrentView('dashboard');
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                    {currentView === 'login' ? (
+                        <LoginScreen onLogin={handleLogin} />
+                    ) : userType === 'customer' ? (
+                        <CustomerPortal userData={userData} onLogout={() => setCurrentView('login')} />
+                    ) : userType === 'admin' ? (
+                        <AdminPortal userData={userData} onLogout={() => setCurrentView('login')} />
+                    ) : (
+                        <DriverPortal userData={userData} onLogout={() => setCurrentView('login')} />
+                    )}
+                </div>
+            );
+        }
+
+        // Login Screen Component
+        function LoginScreen({ onLogin }) {
+            const [selectedType, setSelectedType] = useState(null);
+
+            const loginTypes = [
+                {
+                    type: 'customer',
+                    title: 'Customer Portal',
+                    icon: 'package',
+                    gradient: 'from-blue-500 to-cyan-500',
+                    description: 'Submit delivery requests',
+                    mockData: { name: 'John Doe', id: 'CUST-001' }
+                },
+                {
+                    type: 'admin',
+                    title: 'Admin Dashboard',
+                    icon: 'settings',
+                    gradient: 'from-purple-500 to-pink-500',
+                    description: 'Manage & review deliveries',
+                    mockData: { name: 'Sarah Admin', id: 'ADM-001' }
+                },
+                {
+                    type: 'driver',
+                    title: 'Driver App',
+                    icon: 'truck',
+                    gradient: 'from-orange-500 to-red-500',
+                    description: 'View routes & feedback',
+                    mockData: { name: 'Rajesh Kumar', id: 'DRV-4521', balance: 285 }
+                }
+            ];
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-8">
+                    <div className="max-w-6xl w-full">
+                        <div className="text-center mb-12">
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <i data-lucide="truck" className="w-12 h-12 text-cyan-400"></i>
+                                <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                    Fair Dispatch System
+                                </h1>
+                            </div>
+                            <p className="text-slate-400 text-lg">AI-Powered Fair Route Allocation System</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {loginTypes.map((login) => (
+                                <button
+                                    key={login.type}
+                                    onClick={() => onLogin(login.type, login.mockData)}
+                                    className="group relative overflow-hidden rounded-2xl bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-slate-600 p-8 transition-all duration-300 hover:scale-105"
+                                >
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${login.gradient} opacity-0 group-hover:opacity-10 transition-opacity`} />
+                                   
+                                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${login.gradient} flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform`}>
+                                        <i data-lucide={login.icon} className="w-8 h-8 text-white"></i>
+                                    </div>
+
+                                    <h3 className="text-2xl font-bold text-white mb-2">{login.title}</h3>
+                                    <p className="text-slate-400">{login.description}</p>
+
+                                    <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-500 group-hover:text-slate-300 transition-colors">
+                                        <span>Click to enter</span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Customer Portal Component
+        function CustomerPortal({ userData, onLogout }) {
+            const [formData, setFormData] = useState({
+                address: '123 Main Street, Apt 4B',
+                city: 'Sulur, Tamil Nadu 641402',
+                buildingType: 'apartment',
+                floor: 4,
+                lift: 'sometimes_broken',
+                parking: 'street_limited',
+                access: 'security_gate',
+                weight: 15,
+                size: 'medium',
+                fragile: false,
+                timePreference: 'afternoon',
+                instructions: 'Ring doorbell twice. Building entrance on left side.'
+            });
+
+            const [submitted, setSubmitted] = useState(false);
+            const [aiAnalysis, setAiAnalysis] = useState(null);
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [submitted]);
+
+            const handleSubmit = () => {
+                const analysis = {
+                    totalPoints: 385,
+                    breakdown: {
+                        building: { points: 150, reason: 'Apartment building' },
+                        floor: { points: 60, reason: '4th floor, unreliable lift' },
+                        parking: { points: 30, reason: 'Limited street parking' },
+                        access: { points: 20, reason: 'Security gate approval needed' },
+                        weight: { points: 25, reason: '15kg package' },
+                        traffic: { points: 30, reason: 'Moderate traffic expected' },
+                        distance: { points: 25, reason: '8km from hub' }
+                    },
+                    confidence: 75
+                };
+                setAiAnalysis(analysis);
+                setSubmitted(true);
+            };
+
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                                    <i data-lucide="package" className="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white">Customer Portal</h1>
+                                    <p className="text-slate-400">Welcome, {userData.name}</p>
+                                </div>
+                            </div>
+                            <button onClick={onLogout} className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors">
+                                Logout
+                            </button>
+                        </div>
+
+                        {!submitted ? (
+                            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <i data-lucide="package" className="w-6 h-6 text-cyan-400"></i>
+                                    New Delivery Request
+                                </h2>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-300 mb-2">Delivery Address</label>
+                                        <input
+                                            type="text"
+                                            value={formData.address}
+                                            onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                            className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none transition-colors"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={formData.city}
+                                            onChange={(e) => setFormData({...formData, city: e.target.value})}
+                                            className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none transition-colors mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="building-2" className="w-4 h-4"></i>
+                                                Building Type
+                                            </label>
+                                            <div className="space-y-2">
+                                                {['house', 'apartment', 'office'].map(type => (
+                                                    <label key={type} className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/30 border border-slate-700 hover:border-cyan-400 cursor-pointer transition-colors">
+                                                        <input
+                                                            type="radio"
+                                                            name="buildingType"
+                                                            checked={formData.buildingType === type}
+                                                            onChange={() => setFormData({...formData, buildingType: type})}
+                                                            className="text-cyan-400"
+                                                        />
+                                                        <span className="text-white capitalize">{type}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="stairs" className="w-4 h-4"></i>
+                                                Floor & Lift
+                                            </label>
+                                            <select
+                                                value={formData.floor}
+                                                onChange={(e) => setFormData({...formData, floor: parseInt(e.target.value)})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none mb-2"
+                                            >
+                                                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                                                    <option key={n} value={n}>Floor {n}</option>
+                                                ))}
+                                            </select>
+                                            <select
+                                                value={formData.lift}
+                                                onChange={(e) => setFormData({...formData, lift: e.target.value})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            >
+                                                <option value="working">Lift - Working</option>
+                                                <option value="sometimes_broken">Lift - Sometimes Broken</option>
+                                                <option value="no_lift">No Lift Available</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="car" className="w-4 h-4"></i>
+                                                Parking Availability
+                                            </label>
+                                            <select
+                                                value={formData.parking}
+                                                onChange={(e) => setFormData({...formData, parking: e.target.value})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            >
+                                                <option value="dedicated">Dedicated Parking</option>
+                                                <option value="street_limited">Street Parking (Limited)</option>
+                                                <option value="no_parking">No Parking Nearby</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="shield" className="w-4 h-4"></i>
+                                                Building Access
+                                            </label>
+                                            <select
+                                                value={formData.access}
+                                                onChange={(e) => setFormData({...formData, access: e.target.value})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            >
+                                                <option value="easy">Easy Access</option>
+                                                <option value="security_gate">Security Gate (Need Approval)</option>
+                                                <option value="complex">Complex Entry Procedure</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="weight" className="w-4 h-4"></i>
+                                                Weight (kg)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={formData.weight}
+                                                onChange={(e) => setFormData({...formData, weight: parseInt(e.target.value)})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2">Package Size</label>
+                                            <select
+                                                value={formData.size}
+                                                onChange={(e) => setFormData({...formData, size: e.target.value})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            >
+                                                <option value="small">Small</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="large">Large</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                                <i data-lucide="clock" className="w-4 h-4"></i>
+                                                Time Preference
+                                            </label>
+                                            <select
+                                                value={formData.timePreference}
+                                                onChange={(e) => setFormData({...formData, timePreference: e.target.value})}
+                                                className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none"
+                                            >
+                                                <option value="morning">Morning (8-12)</option>
+                                                <option value="afternoon">Afternoon (12-4)</option>
+                                                <option value="evening">Evening (4-8)</option>
+                                                <option value="anytime">Anytime</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-300 mb-2">Special Instructions</label>
+                                        <textarea
+                                            value={formData.instructions}
+                                            onChange={(e) => setFormData({...formData, instructions: e.target.value})}
+                                            rows={3}
+                                            className="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none resize-none"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                                    >
+                                        <i data-lucide="check-circle" className="w-5 h-5"></i>
+                                        Submit Delivery Request
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-2xl p-6">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <i data-lucide="check-circle" className="w-6 h-6 text-green-400"></i>
+                                        <h3 className="text-xl font-bold text-white">Request Submitted Successfully!</h3>
+                                    </div>
+                                    <p className="text-slate-300">Your delivery request has been received and analyzed by our AI system.</p>
+                                </div>
+
+                                {aiAnalysis && (
+                                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                                        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                            <i data-lucide="activity" className="w-6 h-6 text-cyan-400"></i>
+                                            AI Difficulty Analysis
+                                        </h3>
+
+                                        <div className="grid md:grid-cols-3 gap-6 mb-8">
+                                            <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">Total Difficulty Points</div>
+                                                <div className="text-4xl font-bold text-white mb-2">{aiAnalysis.totalPoints}</div>
+                                                <div className="text-xs text-cyan-400">Based on delivery factors</div>
+                                            </div>
+
+                                            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">AI Confidence Level</div>
+                                                <div className="text-4xl font-bold text-white mb-2">{aiAnalysis.confidence}%</div>
+                                                <div className="text-xs text-purple-400">Will improve after delivery</div>
+                                            </div>
+
+                                            <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">Status</div>
+                                                <div className="text-lg font-bold text-white mb-2">Pending Review</div>
+                                                <div className="text-xs text-orange-400">Admin will review shortly</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <h4 className="text-lg font-semibold text-white mb-4">Difficulty Breakdown:</h4>
+                                            {Object.entries(aiAnalysis.breakdown).map(([key, value]) => (
+                                                <div key={key} className="flex items-center gap-4 p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+                                                    <div className="flex-1">
+                                                        <div className="text-white font-medium capitalize">{key.replace('_', ' ')}</div>
+                                                        <div className="text-sm text-slate-400">{value.reason}</div>
+                                                    </div>
+                                                    <div className="text-2xl font-bold text-cyan-400">+{value.points}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Admin Portal Component
+        function AdminPortal({ userData, onLogout }) {
+            const [pendingDeliveries] = useState([
+                {
+                    id: 3421,
+                    customer: 'John Doe',
+                    address: '123 Main St, Apt 4B',
+                    aiPoints: 385,
+                    breakdown: {
+                        building: 150,
+                        floors: 60,
+                        parking: 30,
+                        access: 20,
+                        weight: 25,
+                        traffic: 30,
+                        distance: 25
+                    }
+                },
+                {
+                    id: 3422,
+                    customer: 'Sarah Johnson',
+                    address: '456 Oak Avenue',
+                    aiPoints: 220,
+                    breakdown: {
+                        building: 100,
+                        floors: 20,
+                        parking: 0,
+                        access: 0,
+                        weight: 10,
+                        traffic: 40,
+                        distance: 50
+                    }
+                }
+            ]);
+
+            const [selectedDelivery, setSelectedDelivery] = useState(pendingDeliveries[0]);
+            const [adjustedPoints, setAdjustedPoints] = useState(selectedDelivery.aiPoints);
+            const [correctionNote, setCorrectionNote] = useState('');
+
+            const stats = {
+                totalToday: 45,
+                pendingReview: 12,
+                assigned: 28,
+                completed: 5
+            };
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [selectedDelivery]);
+
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                    <i data-lucide="settings" className="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+                                    <p className="text-slate-400">Welcome, {userData.name}</p>
+                                </div>
+                            </div>
+                            <button onClick={onLogout} className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors">
+                                Logout
+                            </button>
+                        </div>
+
+                        <div className="grid md:grid-cols-4 gap-6 mb-8">
+                            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/50 rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <i data-lucide="package" className="w-8 h-8 text-blue-400"></i>
+                                    <span className="text-3xl font-bold text-white">{stats.totalToday}</span>
+                                </div>
+                                <div className="text-sm text-slate-300">Total Deliveries Today</div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/50 rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <i data-lucide="clock" className="w-8 h-8 text-orange-400"></i>
+                                    <span className="text-3xl font-bold text-white">{stats.pendingReview}</span>
+                                </div>
+                                <div className="text-sm text-slate-300">Pending Review</div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/50 rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <i data-lucide="truck" className="w-8 h-8 text-purple-400"></i>
+                                    <span className="text-3xl font-bold text-white">{stats.assigned}</span>
+                                </div>
+                                <div className="text-sm text-slate-300">Assigned to Drivers</div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <i data-lucide="check-circle" className="w-8 h-8 text-green-400"></i>
+                                    <span className="text-3xl font-bold text-white">{stats.completed}</span>
+                                </div>
+                                <div className="text-sm text-slate-300">Completed Today</div>
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-6">
+                            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
+                                <h3 className="text-xl font-bold text-white mb-4">Pending Review ({pendingDeliveries.length})</h3>
+                                <div className="space-y-3">
+                                    {pendingDeliveries.map(delivery => (
+                                        <button
+                                            key={delivery.id}
+                                            onClick={() => {
+                                                setSelectedDelivery(delivery);
+                                                setAdjustedPoints(delivery.aiPoints);
+                                            }}
+                                            className={`w-full text-left p-4 rounded-lg border transition-all ${
+                                                selectedDelivery.id === delivery.id
+                                                    ? 'bg-purple-500/20 border-purple-500'
+                                                    : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-white font-semibold">#{delivery.id}</span>
+                                                <span className="text-cyan-400 font-bold">{delivery.aiPoints} pts</span>
+                                            </div>
+                                            <div className="text-sm text-slate-400">{delivery.customer}</div>
+                                            <div className="text-xs text-slate-500 mt-1">{delivery.address}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-2xl font-bold text-white">Delivery #{selectedDelivery.id}</h3>
+                                    <div className="px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500 text-purple-300 text-sm font-semibold">
+                                        AI Confidence: 75%
+                                    </div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <div className="text-slate-400 text-sm mb-2">Customer</div>
+                                    <div className="text-white text-lg font-semibold">{selectedDelivery.customer}</div>
+                                    <div className="text-slate-500">{selectedDelivery.address}</div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <h4 className="text-lg font-semibold text-white mb-4">AI Difficulty Breakdown:</h4>
+                                    <div className="space-y-3">
+                                        {Object.entries(selectedDelivery.breakdown).map(([key, points]) => (
+                                            <div key={key} className="flex items-center gap-4">
+                                                <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all"
+                                                        style={{ width: `${(points / 150) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <div className="text-white font-medium w-24 text-right">{points} pts</div>
+                                                <div className="text-slate-400 capitalize w-32">{key}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700 mb-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <label className="text-white font-semibold">Adjust Difficulty Points:</label>
+                                        <div className="flex items-center gap-4">
+                                            <button
+                                                onClick={() => setAdjustedPoints(Math.max(0, adjustedPoints - 10))}
+                                                className="w-10 h-10 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors"
+                                            >
+                                                -
+                                            </button>
+                                            <input
+                                                type="number"
+                                                value={adjustedPoints}
+                                                onChange={(e) => setAdjustedPoints(parseInt(e.target.value) || 0)}
+                                                className="w-24 px-4 py-2 text-center rounded-lg bg-slate-800 border border-slate-600 text-white font-bold text-xl focus:border-cyan-400 focus:outline-none"
+                                            />
+                                            <button
+                                                onClick={() => setAdjustedPoints(adjustedPoints + 10)}
+                                                className="w-10 h-10 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {adjustedPoints !== selectedDelivery.aiPoints && (
+                                        <div className="flex items-center gap-2 text-sm mb-4">
+                                            <i data-lucide="trending-up" className="w-4 h-4 text-orange-400"></i>
+                                            <span className="text-orange-400">
+                                                {adjustedPoints > selectedDelivery.aiPoints ? '+' : ''}
+                                                {adjustedPoints - selectedDelivery.aiPoints} points adjustment
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    <div className="mt-4">
+                                        <label className="block text-sm text-slate-400 mb-2">Correction Reason:</label>
+                                        <textarea
+                                            value={correctionNote}
+                                            onChange={(e) => setCorrectionNote(e.target.value)}
+                                            placeholder="Building known to have slow elevator. Add +20 points."
+                                            rows={3}
+                                            className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white focus:border-cyan-400 focus:outline-none resize-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={() => {
+                                            alert(`Delivery #${selectedDelivery.id} approved and assigned to driver!\n\nFinal Points: ${adjustedPoints}\n${correctionNote ? `Correction: ${correctionNote}` : ''}\n\nThe driver will receive this route assignment.`);
+                                        }}
+                                        className="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                                    >
+                                        <i data-lucide="check-circle" className="w-5 h-5"></i>
+                                        Approve & Assign
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            alert('Request for more information has been sent to the customer.');
+                                        }}
+                                        className="px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors"
+                                    >
+                                        Request More Info
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Delivery Navigation View Component (fake map + traffic + real-time scoring)
+        function DeliveryNavigationView({ route, onComplete, actualDifficulties, setActualDifficulties }) {
+            const [progress, setProgress] = useState(0);
+            const [elapsedTime, setElapsedTime] = useState(0);
+            const traffic = calculateTrafficScore();
+
+            useEffect(() => {
+                lucide.createIcons();
+                const interval = setInterval(() => {
+                    setProgress(prev => Math.min(prev + 2, 100));
+                    setElapsedTime(prev => prev + 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <i data-lucide="navigation" className="w-6 h-6 text-green-400"></i>
+                        Navigation Active - Route in Progress
+                    </h3>
+
+                    {/* Map: OpenStreetMap (no API key) + link to Google Maps */}
+                    <div className="mb-6 rounded-xl overflow-hidden border border-slate-700 bg-slate-900" style={{ height: '400px', position: 'relative' }}>
+                        <iframe
+                            title="Route Map (OpenStreetMap)"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=77.0%2C10.9%2C77.2%2C11.1&layer=mapnik&marker=11.0%2C77.1`}
+                        />
+                        {/* Traffic and progress indicators overlay */}
+                        <div className="absolute top-4 left-4 px-3 py-2 rounded-lg bg-red-500/90 backdrop-blur-sm text-white text-sm font-semibold flex items-center gap-2 z-10">
+                            <i data-lucide="activity" className="w-4 h-4"></i>
+                            Traffic: {traffic.level.toUpperCase()}
+                        </div>
+                        <div className="absolute top-4 right-4 px-3 py-2 rounded-lg bg-blue-500/90 backdrop-blur-sm text-white text-sm font-semibold z-10">
+                            {Math.round(route.distance * (1 - progress / 100) * 10) / 10} km remaining
+                        </div>
+                        {/* Open in Google Maps - works without API key */}
+                        <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(route.address)}&travelmode=driving`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute bottom-10 left-4 right-4 z-10 py-3 px-4 rounded-xl bg-green-600 hover:bg-green-500 text-white font-semibold text-center flex items-center justify-center gap-2 shadow-lg"
+                        >
+                            <i data-lucide="map-pin" className="w-5 h-5"></i>
+                            Open route in Google Maps
+                        </a>
+                        {/* Progress line */}
+                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-slate-700 z-10">
+                            <div 
+                                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-1000"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Real-time Difficulty Scores */}
+                    <div className="grid md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/50 rounded-xl p-4">
+                            <div className="text-sm text-slate-300 mb-1">Traffic Score (Live)</div>
+                            <div className="text-3xl font-bold text-white">{traffic.points}</div>
+                            <div className="text-xs text-red-400 mt-1">Level: {traffic.level}</div>
+                        </div>
+                        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/50 rounded-xl p-4">
+                            <div className="text-sm text-slate-300 mb-1">Base Assumed Points</div>
+                            <div className="text-3xl font-bold text-white">{route.baseDifficulty}</div>
+                            <div className="text-xs text-blue-400 mt-1">Will adjust after delivery</div>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/50 rounded-xl p-4">
+                            <div className="text-sm text-slate-300 mb-1">Time Elapsed</div>
+                            <div className="text-3xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</div>
+                            <div className="text-xs text-purple-400 mt-1">Estimated: {route.estimatedTime} min</div>
+                        </div>
+                    </div>
+
+                    {/* Report Actual Difficulties */}
+                    <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700 mb-6">
+                        <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="alert-circle" className="w-5 h-5 text-orange-400"></i>
+                            Report Actual Difficulties Encountered
+                        </h4>
+                        <p className="text-sm text-slate-400 mb-4">Check any issues you encountered. These will add points to your final score.</p>
+                        <div className="grid md:grid-cols-2 gap-3">
+                            <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-orange-500 cursor-pointer transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={actualDifficulties.liftBroken}
+                                    onChange={(e) => setActualDifficulties({...actualDifficulties, liftBroken: e.target.checked})}
+                                    className="w-4 h-4 text-orange-400 rounded"
+                                />
+                                <span className="text-white">Lift was broken / not working</span>
+                            </label>
+                            <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-orange-500 cursor-pointer transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={actualDifficulties.parkingWorse}
+                                    onChange={(e) => setActualDifficulties({...actualDifficulties, parkingWorse: e.target.checked})}
+                                    className="w-4 h-4 text-orange-400 rounded"
+                                />
+                                <span className="text-white">Parking was worse than expected</span>
+                            </label>
+                            <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-orange-500 cursor-pointer transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={actualDifficulties.trafficWorse}
+                                    onChange={(e) => setActualDifficulties({...actualDifficulties, trafficWorse: e.target.checked})}
+                                    className="w-4 h-4 text-orange-400 rounded"
+                                />
+                                <span className="text-white">Unexpected traffic congestion</span>
+                            </label>
+                            <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-orange-500 cursor-pointer transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={actualDifficulties.accessWorse}
+                                    onChange={(e) => setActualDifficulties({...actualDifficulties, accessWorse: e.target.checked})}
+                                    className="w-4 h-4 text-orange-400 rounded"
+                                />
+                                <span className="text-white">Building access more complex</span>
+                            </label>
+                            <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-orange-500 cursor-pointer transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={actualDifficulties.stairsWorse}
+                                    onChange={(e) => setActualDifficulties({...actualDifficulties, stairsWorse: e.target.checked})}
+                                    className="w-4 h-4 text-orange-400 rounded"
+                                />
+                                <span className="text-white">More stairs than expected</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={onComplete}
+                        disabled={progress < 100}
+                        className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="check-circle" className="w-5 h-5"></i>
+                        {progress < 100 ? `Complete Delivery (${progress}%)` : 'Complete Delivery & Calculate Final Points'}
+                    </button>
+                </div>
+            );
+        }
+
+        // Delivery Completion View Component
+        function DeliveryCompletionView({ finalPoints, onReset }) {
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+
+            if (!finalPoints) return null;
+
+            return (
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-xl p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-2">
+                            <i data-lucide="check-circle" className="w-8 h-8 text-green-400"></i>
+                            <h3 className="text-2xl font-bold text-white">Delivery Completed Successfully!</h3>
+                        </div>
+                        <p className="text-slate-300">Final points calculated based on actual difficulties encountered.</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/50 rounded-xl p-6">
+                            <div className="text-sm text-slate-300 mb-2">Base Assumed Points</div>
+                            <div className="text-4xl font-bold text-white">{finalPoints.base}</div>
+                            <div className="text-xs text-blue-400 mt-1">From customer form</div>
+                        </div>
+                        <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/50 rounded-xl p-6">
+                            <div className="text-sm text-slate-300 mb-2">Additional Points</div>
+                            <div className="text-4xl font-bold text-white">+{finalPoints.additional}</div>
+                            <div className="text-xs text-orange-400 mt-1">From actual difficulties</div>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/50 rounded-xl p-6">
+                            <div className="text-sm text-slate-300 mb-2">Final Points Earned</div>
+                            <div className="text-4xl font-bold text-white">{finalPoints.total}</div>
+                            <div className="text-xs text-purple-400 mt-1">Added to monthly balance</div>
+                        </div>
+                    </div>
+
+                    {finalPoints.adjustments.length > 0 && (
+                        <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700 mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-4">Point Adjustments Breakdown:</h4>
+                            <div className="space-y-3">
+                                {finalPoints.adjustments.map((adj, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                                        <div>
+                                            <div className="text-white font-medium">{adj.factor}</div>
+                                            <div className="text-sm text-slate-400">{adj.reason}</div>
+                                        </div>
+                                        <div className="text-2xl font-bold text-orange-400">+{adj.points}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <button
+                        onClick={onReset}
+                        className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="arrow-left" className="w-5 h-5"></i>
+                        Back to Dashboard
+                    </button>
+                </div>
+            );
+        }
+
+        // Helper function for traffic calculation (needs to be accessible)
+        const calculateTrafficScore = () => {
+            const hour = new Date().getHours();
+            let trafficLevel = 'low';
+            let trafficPoints = 20;
+            
+            if (hour >= 7 && hour <= 9) {
+                trafficLevel = 'high';
+                trafficPoints = 55;
+            } else if (hour >= 17 && hour <= 19) {
+                trafficLevel = 'high';
+                trafficPoints = 60;
+            } else if (hour >= 10 && hour <= 16) {
+                trafficLevel = 'medium';
+                trafficPoints = 35;
+            } else {
+                trafficLevel = 'low';
+                trafficPoints = 20;
+            }
+            
+            return { level: trafficLevel, points: trafficPoints };
+        };
+
+        // Driver Portal Component
+        function DriverPortal({ userData, onLogout }) {
+            const [view, setView] = useState('dashboard');
+            const [deliveryStatus, setDeliveryStatus] = useState('not_started'); // not_started, navigating, completed
+            const [actualDifficulties, setActualDifficulties] = useState({
+                liftBroken: false,
+                parkingWorse: false,
+                trafficWorse: false,
+                accessWorse: false,
+                stairsWorse: false
+            });
+            const [finalPoints, setFinalPoints] = useState(null);
+            const [monthlyBalance, setMonthlyBalance] = useState(userData.balance || 285);
+            const [deliveryCount, setDeliveryCount] = useState(22);
+           
+            const monthlyStats = {
+                balance: monthlyBalance,
+                deliveries: deliveryCount,
+                distance: 485,
+                targetBalance: 0,
+                daysLeft: 10
+            };
+
+            const todayRoute = {
+                id: 3421,
+                address: '123 Main St, Apt 4B, Sulur',
+                customer: 'John Doe',
+                baseDifficulty: 385,
+                personalDifficulty: 515,
+                adjustment: 130,
+                floor: 4,
+                liftStatus: 'Sometimes broken',
+                parking: 'Limited street parking',
+                weight: 15,
+                estimatedTime: 45,
+                distance: 8.5, // km
+                details: {
+                    distance: { base: 80, personal: 160, multiplier: 2.0 },
+                    stairs: { base: 60, personal: 90, multiplier: 1.5 },
+                    traffic: { base: 30, personal: 45, multiplier: 1.5 },
+                    weight: { base: 25, personal: 30, multiplier: 1.2 },
+                    parking: { base: 30, personal: 27, multiplier: 0.9 },
+                    access: { base: 20, personal: 16, multiplier: 0.8 }
+                }
+            };
+
+            // Fake backend: Calculate traffic score based on current time
+            const calculateTrafficScore = () => {
+                const hour = new Date().getHours();
+                let trafficLevel = 'low';
+                let trafficPoints = 20;
+                
+                if (hour >= 7 && hour <= 9) {
+                    trafficLevel = 'high';
+                    trafficPoints = 55;
+                } else if (hour >= 17 && hour <= 19) {
+                    trafficLevel = 'high';
+                    trafficPoints = 60;
+                } else if (hour >= 10 && hour <= 16) {
+                    trafficLevel = 'medium';
+                    trafficPoints = 35;
+                } else {
+                    trafficLevel = 'low';
+                    trafficPoints = 20;
+                }
+                
+                return { level: trafficLevel, points: trafficPoints };
+            };
+
+            const handleStartNavigation = () => {
+                setDeliveryStatus('navigating');
+            };
+
+            const handleCompleteDelivery = () => {
+                // Fake backend: Calculate final points
+                const basePoints = todayRoute.baseDifficulty;
+                let additionalPoints = 0;
+                const adjustments = [];
+
+                // Calculate traffic score
+                const traffic = calculateTrafficScore();
+                const trafficDiff = traffic.points - todayRoute.details.traffic.base;
+                if (trafficDiff > 0) {
+                    additionalPoints += trafficDiff;
+                    adjustments.push({ factor: 'Traffic', points: trafficDiff, reason: `Actual traffic (${traffic.level}) was worse than estimated` });
+                }
+
+                // Check actual difficulties reported
+                if (actualDifficulties.liftBroken) {
+                    const liftPenalty = 25;
+                    additionalPoints += liftPenalty;
+                    adjustments.push({ factor: 'Lift Broken', points: liftPenalty, reason: 'Lift was not working, had to climb stairs' });
+                }
+
+                if (actualDifficulties.parkingWorse) {
+                    const parkingPenalty = 20;
+                    additionalPoints += parkingPenalty;
+                    adjustments.push({ factor: 'Parking Issues', points: parkingPenalty, reason: 'Parking was more difficult than expected' });
+                }
+
+                if (actualDifficulties.trafficWorse) {
+                    const extraTraffic = 15;
+                    additionalPoints += extraTraffic;
+                    adjustments.push({ factor: 'Traffic Delay', points: extraTraffic, reason: 'Unexpected traffic congestion' });
+                }
+
+                if (actualDifficulties.accessWorse) {
+                    const accessPenalty = 15;
+                    additionalPoints += accessPenalty;
+                    adjustments.push({ factor: 'Access Difficulty', points: accessPenalty, reason: 'Building access was more complex' });
+                }
+
+                if (actualDifficulties.stairsWorse) {
+                    const stairsPenalty = 18;
+                    additionalPoints += stairsPenalty;
+                    adjustments.push({ factor: 'Stairs Difficulty', points: stairsPenalty, reason: 'More stairs than expected' });
+                }
+
+                const final = basePoints + additionalPoints;
+                setFinalPoints({
+                    base: basePoints,
+                    additional: additionalPoints,
+                    total: final,
+                    adjustments: adjustments
+                });
+
+                // Update monthly balance (fake backend)
+                setMonthlyBalance(prev => prev + final);
+                setDeliveryCount(prev => prev + 1);
+                setDeliveryStatus('completed');
+            };
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [view, deliveryStatus]);
+
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                                    <i data-lucide="truck" className="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white">Driver Dashboard</h1>
+                                    <p className="text-slate-400">Welcome, {userData.name}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setView('dashboard')}
+                                        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            view === 'dashboard'
+                                                ? 'bg-orange-500 text-white'
+                                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        }`}
+                                    >
+                                        Today's Route
+                                    </button>
+                                    <button
+                                        onClick={() => setView('preferences')}
+                                        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            view === 'preferences'
+                                                ? 'bg-orange-500 text-white'
+                                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        }`}
+                                    >
+                                        Preferences
+                                    </button>
+                                </div>
+                                <button onClick={onLogout} className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors">
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+
+                        {view === 'dashboard' ? (
+                            <div className="space-y-6">
+                                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/50 rounded-2xl p-8">
+                                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                        <i data-lucide="bar-chart-3" className="w-6 h-6 text-orange-400"></i>
+                                        February 2026 - Monthly Balance
+                                    </h3>
+
+                                    <div className="grid md:grid-cols-5 gap-6">
+                                        <div>
+                                            <div className="text-sm text-slate-400 mb-2">Current Balance</div>
+                                            <div className="text-4xl font-bold text-white">{monthlyBalance >= 0 ? '+' : ''}{monthlyBalance}</div>
+                                            <div className="text-xs text-orange-400 mt-1">Points</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-slate-400 mb-2">Target Balance</div>
+                                            <div className="text-4xl font-bold text-white">{monthlyStats.targetBalance}</div>
+                                            <div className="text-xs text-green-400 mt-1">± 500 range</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-slate-400 mb-2">Total Deliveries</div>
+                                            <div className="text-4xl font-bold text-white">{deliveryCount}</div>
+                                            <div className="text-xs text-slate-400 mt-1">This month</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-slate-400 mb-2">Distance</div>
+                                            <div className="text-4xl font-bold text-white">{monthlyStats.distance}</div>
+                                            <div className="text-xs text-slate-400 mt-1">Kilometers</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-slate-400 mb-2">Days Left</div>
+                                            <div className="text-4xl font-bold text-white">{monthlyStats.daysLeft}</div>
+                                            <div className="text-xs text-slate-400 mt-1">In February</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700">
+                                        <div className="flex items-start gap-3">
+                                            <i data-lucide="alert-circle" className="w-5 h-5 text-orange-400 mt-0.5"></i>
+                                            <div>
+                                                <div className="text-white font-semibold mb-1">Balance Status</div>
+                                                <div className="text-slate-300 text-sm">
+                                                    You've had harder work this month ({monthlyBalance >= 0 ? '+' : ''}{monthlyBalance} points).
+                                                    You'll likely get easier routes next week to bring your balance toward 0.
+                                                    The allocation engine spreads hard constraints across all available drivers so no one
+                                                    gets all the tough routes, and everyone ends the month balanced within ±500 points.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {deliveryStatus === 'not_started' ? (
+                                    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                                        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                            <i data-lucide="navigation" className="w-6 h-6 text-cyan-400"></i>
+                                            Today's Route Assignment
+                                        </h3>
+
+                                        <div className="grid md:grid-cols-3 gap-6 mb-8">
+                                            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">Base Difficulty</div>
+                                                <div className="text-4xl font-bold text-white mb-2">{todayRoute.baseDifficulty}</div>
+                                                <div className="text-xs text-cyan-400">Assumed points</div>
+                                            </div>
+
+                                            <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">Your Personal Difficulty</div>
+                                                <div className="text-4xl font-bold text-white mb-2">{todayRoute.personalDifficulty}</div>
+                                                <div className="text-xs text-orange-400">Based on your preferences</div>
+                                            </div>
+
+                                            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-xl p-6">
+                                                <div className="text-sm text-slate-400 mb-2">Adjustment</div>
+                                                <div className="text-4xl font-bold text-white mb-2">+{todayRoute.adjustment}</div>
+                                                <div className="text-xs text-purple-400">Due to distance preference</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700 mb-6">
+                                            <h4 className="text-lg font-semibold text-white mb-4">Delivery Details:</h4>
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="map-pin" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Address</div>
+                                                        <div className="text-white">{todayRoute.address}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="user" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Customer</div>
+                                                        <div className="text-white">{todayRoute.customer}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="stairs" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Floor & Lift</div>
+                                                        <div className="text-white">{todayRoute.floor}th floor - {todayRoute.liftStatus}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="car" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Parking</div>
+                                                        <div className="text-white">{todayRoute.parking}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="weight" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Package Weight</div>
+                                                        <div className="text-white">{todayRoute.weight}kg - Medium size</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <i data-lucide="clock" className="w-5 h-5 text-cyan-400"></i>
+                                                    <div>
+                                                        <div className="text-sm text-slate-400">Estimated Time</div>
+                                                        <div className="text-white">{todayRoute.estimatedTime} minutes</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-4">
+                                            <button 
+                                                onClick={handleStartNavigation}
+                                                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                                            >
+                                                <i data-lucide="navigation" className="w-5 h-5"></i>
+                                                Start Navigation
+                                            </button>
+                                            <button className="px-6 py-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors flex items-center gap-2">
+                                                <i data-lucide="phone" className="w-5 h-5"></i>
+                                                Contact Customer
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : deliveryStatus === 'navigating' ? (
+                                    <DeliveryNavigationView 
+                                        route={todayRoute}
+                                        onComplete={handleCompleteDelivery}
+                                        actualDifficulties={actualDifficulties}
+                                        setActualDifficulties={setActualDifficulties}
+                                    />
+                                ) : (
+                                    <DeliveryCompletionView 
+                                        finalPoints={finalPoints}
+                                        onReset={() => {
+                                            setDeliveryStatus('not_started');
+                                            setFinalPoints(null);
+                                            setActualDifficulties({
+                                                liftBroken: false,
+                                                parkingWorse: false,
+                                                trafficWorse: false,
+                                                accessWorse: false,
+                                                stairsWorse: false
+                                            });
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <DriverPreferences />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Driver Preferences Component – choose difficulties, then order only the chosen ones
+        function DriverPreferences() {
+            const allFactors = [
+                { key: 'longDistance', label: 'Long Distance (>15km)', icon: 'map-pin' },
+                { key: 'heavyPackages', label: 'Heavy Packages (>20kg)', icon: 'weight' },
+                { key: 'stairs', label: 'Climbing Stairs (>3 floors)', icon: 'stairs' },
+                { key: 'parking', label: 'No / Difficult Parking', icon: 'car' },
+                { key: 'access', label: 'Complex Building Access', icon: 'building-2' },
+                { key: 'traffic', label: 'High Traffic Areas', icon: 'activity' },
+                { key: 'multipleStops', label: 'Multiple Deliveries / Stops', icon: 'package' },
+                { key: 'timeSensitive', label: 'Time-Sensitive Deliveries', icon: 'clock' }
+            ];
+
+            const [selectedKeys, setSelectedKeys] = useState([
+                'stairs',
+                'heavyPackages',
+                'longDistance'
+            ]);
+
+            useEffect(() => {
+                lucide.createIcons();
+                const storedSel = localStorage.getItem('driverSelectedFactors');
+                const storedOrder = localStorage.getItem('driverPreferenceOrder_v3');
+                if (storedSel) {
+                    try {
+                        const parsed = JSON.parse(storedSel);
+                        if (Array.isArray(parsed) && parsed.length) setSelectedKeys(parsed);
+                    } catch {}
+                } else if (storedOrder) {
+                    try {
+                        const parsed = JSON.parse(storedOrder);
+                        if (Array.isArray(parsed) && parsed.length) setSelectedKeys(parsed);
+                    } catch {}
+                }
+            }, []);
+
+            const moveKey = (key, delta) => {
+                const idx = selectedKeys.indexOf(key);
+                if (idx === -1) return;
+                const newIndex = idx + delta;
+                if (newIndex < 0 || newIndex >= selectedKeys.length) return;
+                const updated = [...selectedKeys];
+                const temp = updated[newIndex];
+                updated[newIndex] = updated[idx];
+                updated[idx] = temp;
+                setSelectedKeys(updated);
+            };
+
+            const toggleSelected = (key) => {
+                setSelectedKeys(prev => {
+                    if (prev.includes(key)) {
+                        if (prev.length === 1) return prev; // keep at least one
+                        return prev.filter(k => k !== key);
+                    }
+                    return [...prev, key];
+                });
+            };
+
+            const rankToMultiplier = (rank, max) => {
+                const t = (rank - 1) / Math.max(1, max - 1);
+                return 2.0 - 1.0 * t; // 2.0 down to 1.0
+            };
+
+            const handleSave = () => {
+                const chosenCount = selectedKeys.length || 1;
+                const ordered = selectedKeys.map((key, index) => ({
+                    key,
+                    rank: index + 1,
+                    multiplier: Number(rankToMultiplier(index + 1, chosenCount).toFixed(2))
+                }));
+
+                const neutral = allFactors
+                    .filter(f => !selectedKeys.includes(f.key))
+                    .map(f => ({ key: f.key, rank: null, multiplier: 1.0 }));
+
+                const fullPayload = [...ordered, ...neutral];
+
+                localStorage.setItem('driverSelectedFactors', JSON.stringify(selectedKeys));
+                localStorage.setItem('driverPreferenceOrder_v3', JSON.stringify(selectedKeys));
+                localStorage.setItem('driverPreferenceScales', JSON.stringify(fullPayload));
+
+                alert('Preferences saved. Only selected factors are treated as difficult; others stay neutral.');
+            };
+
+            const handleReset = () => {
+                setSelectedKeys(['stairs', 'heavyPackages', 'longDistance']);
+                localStorage.removeItem('driverSelectedFactors');
+                localStorage.removeItem('driverPreferenceOrder_v3');
+                localStorage.removeItem('driverPreferenceScales');
+            };
+
+            return (
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700 p-8">
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <i data-lucide="star" className="w-6 h-6 text-orange-400"></i>
+                        Arrange Your Difficulty Factors
+                    </h3>
+
+                    <p className="text-slate-300 mb-4">
+                        Tick only the difficulty types that really bother you, then use the arrows to order the{" "}
+                        <span className="font-semibold text-white">selected</span> ones from{" "}
+                        <span className="font-semibold text-white">hardest (Rank 1)</span> to{" "}
+                        <span className="font-semibold text-white">easiest (last)</span>.
+                        Unselected factors are neutral (×1.0).
+                    </p>
+
+                    <div className="space-y-3">
+                        {allFactors.map(factor => {
+                            const index = selectedKeys.indexOf(factor.key);
+                            const isSelected = index !== -1;
+                            const rank = isSelected ? index + 1 : null;
+                            const multiplier = isSelected
+                                ? rankToMultiplier(rank, selectedKeys.length).toFixed(2)
+                                : '1.00';
+
+                            return (
+                                <div
+                                    key={factor.key}
+                                    className="flex items-center justify-between p-4 rounded-xl bg-slate-900/60 border border-slate-700"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={() => toggleSelected(factor.key)}
+                                            className="w-4 h-4 text-orange-400 rounded border-slate-600 bg-slate-800"
+                                        />
+                                        <div className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center">
+                                            <i data-lucide={factor.icon} className="w-5 h-5 text-cyan-400"></i>
+                                        </div>
+                                        <div>
+                                            <div className="text-white font-semibold">{factor.label}</div>
+                                            <div className="text-xs text-slate-400">
+                                                {isSelected
+                                                    ? `Rank ${rank} — 1 is hardest for you`
+                                                    : 'Not marked as difficult for you (neutral)'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="px-3 py-1 rounded-full bg-slate-800 text-xs text-orange-300 border border-slate-600">
+                                            Multiplier ×{multiplier}
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <button
+                                                onClick={() => moveKey(factor.key, -1)}
+                                                disabled={!isSelected}
+                                                className={`w-8 h-8 rounded-lg text-xs ${
+                                                    isSelected
+                                                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                                                        : 'bg-slate-900 text-slate-600 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                ↑
+                                            </button>
+                                            <button
+                                                onClick={() => moveKey(factor.key, 1)}
+                                                disabled={!isSelected}
+                                                className={`w-8 h-8 rounded-lg text-xs ${
+                                                    isSelected
+                                                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                                                        : 'bg-slate-900 text-slate-600 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                ↓
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="mt-8 p-6 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/50">
+                        <h4 className="text-lg font-semibold text-white mb-3">How this connects to scoring</h4>
+                        <p className="text-sm text-slate-200">
+                            Selected difficulties get multipliers based on their rank (hardest ≈ ×2.0, easiest ≈ ×1.0). Neutral factors stay at ×1.0.
+                            The allocation logic uses these multipliers as a soft signal on top of the AI difficulty points so that hard routes are spread fairly.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-4 mt-8">
+                        <button
+                            onClick={handleSave}
+                            className="flex-1 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        >
+                            <i data-lucide="check-circle" className="w-5 h-5"></i>
+                            Save Ordered Preferences
+                        </button>
+                        <button
+                            onClick={handleReset}
+                            className="px-6 py-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors"
+                        >
+                            Reset to Default
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<FairDispatchSystem />, document.getElementById('root'));
+    </script>
+</body>
+</html>
